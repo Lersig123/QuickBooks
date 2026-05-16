@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickBooks Mastery — 2-Week VA Training Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8;
+    color: #1a2b3c;
+    line-height: 1.6;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    grid-column: 1 / -1;
+    background: linear-gradient(90deg, #2ca01c 0%, #1f7a14 100%);
+    color: white;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header h1 span { opacity: 0.85; font-weight: 400; font-size: 16px; margin-left: 8px; }
+  .progress-wrap {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.15);
+    padding: 8px 16px; border-radius: 20px;
+  }
+  .progress-bar {
+    width: 180px; height: 8px; background: rgba(255,255,255,0.25);
+    border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: #fff; transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-text { font-size: 13px; font-weight: 600; }
+  #resetBtn {
+    background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 12px; border-radius: 14px; cursor: pointer; font-size: 12px;
+  }
+  #resetBtn:hover { background: rgba(255,255,255,0.25); }
+
+  /* SIDEBAR */
+  aside {
+    background: white;
+    border-right: 1px solid #e3e8ee;
+    padding: 24px 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    position: sticky; top: 70px;
+  }
+  .week-label {
+    padding: 10px 24px 6px;
+    font-size: 11px; text-transform: uppercase; font-weight: 700;
+    color: #6b7c93; letter-spacing: 1px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    font-size: 14px;
+  }
+  .nav-item:hover { background: #f4f9f3; }
+  .nav-item.active {
+    background: #eaf6e7; color: #2ca01c; font-weight: 600;
+    border-left-color: #2ca01c;
+  }
+  .nav-check {
+    width: 18px; height: 18px; border: 2px solid #cbd5e0;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 11px; color: white;
+  }
+  .nav-item.completed .nav-check { background: #2ca01c; border-color: #2ca01c; }
+  .nav-item.completed .nav-check::after { content: "✓"; }
+  .nav-day { font-size: 11px; color: #8898aa; }
+
+  /* MAIN */
+  main {
+    padding: 36px 48px;
+    max-width: 980px;
+    overflow-x: hidden;
+  }
+  .lesson { display: none; animation: fadeIn 0.3s; }
+  .lesson.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .breadcrumb { font-size: 13px; color: #6b7c93; margin-bottom: 10px; }
+  .lesson h2 {
+    font-size: 30px; color: #1a2b3c; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 16px; color: #6b7c93; margin-bottom: 28px; }
+
+  .obj-card {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+  }
+  .obj-block {
+    background: white; padding: 16px 18px; border-radius: 10px;
+    border: 1px solid #e3e8ee;
+  }
+  .obj-block h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: #2ca01c; margin-bottom: 6px;
+  }
+  .obj-block p { font-size: 14px; color: #324a5e; }
+
+  .content-block {
+    background: white; padding: 28px 32px; border-radius: 12px;
+    border: 1px solid #e3e8ee; margin-bottom: 24px;
+  }
+  .content-block h3 {
+    font-size: 19px; margin-bottom: 14px; color: #1a2b3c;
+    padding-bottom: 8px; border-bottom: 2px solid #f0f4f8;
+  }
+  .content-block p, .content-block li { font-size: 15px; color: #324a5e; margin-bottom: 8px; }
+  .content-block ul, .content-block ol { padding-left: 24px; margin-bottom: 12px; }
+  .content-block li { margin-bottom: 6px; }
+
+  .highlight {
+    background: #fff8d9; border-left: 4px solid #f5b500;
+    padding: 12px 16px; border-radius: 4px; margin: 14px 0;
+    font-size: 14px;
+  }
+  .danger {
+    background: #fde7e9; border-left: 4px solid #e63946;
+    padding: 12px 16px; border-radius: 4px; margin: 14px 0;
+    font-size: 14px;
+  }
+  .success {
+    background: #e8f6e6; border-left: 4px solid #2ca01c;
+    padding: 12px 16px; border-radius: 4px; margin: 14px 0;
+    font-size: 14px;
+  }
+
+  /* STEP LIST */
+  .steps { counter-reset: step; padding-left: 0 !important; list-style: none; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 14px 14px 14px 56px;
+    background: #f8fafb;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #2ca01c;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 14px; top: 14px;
+    width: 28px; height: 28px;
+    background: #2ca01c; color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+
+  /* MOCK QB UI */
+  .qb-mock {
+    background: #f4f7fa; border: 1px solid #d1dae3; border-radius: 8px;
+    margin: 16px 0; overflow: hidden;
+  }
+  .qb-mock-header {
+    background: #2ca01c; color: white; padding: 8px 14px;
+    font-size: 12px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .qb-mock-body { padding: 16px; background: white; font-size: 13px; }
+  .qb-btn {
+    display: inline-block; background: #2ca01c; color: white;
+    padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 600;
+    margin: 2px 4px 2px 0;
+  }
+  .qb-btn.ghost { background: white; color: #2ca01c; border: 1px solid #2ca01c; }
+  .qb-btn.gray { background: #6b7c93; }
+  .qb-field {
+    display: block; background: #f4f7fa; border: 1px solid #d1dae3;
+    padding: 7px 10px; margin: 4px 0; border-radius: 4px;
+    font-size: 13px; color: #324a5e;
+  }
+  .qb-field strong { color: #1a2b3c; }
+  .qb-arrow { color: #e63946; font-weight: 700; }
+  .qb-left-nav {
+    display: flex; flex-direction: column; gap: 4px;
+    background: #1a2b3c; color: white; padding: 12px;
+    font-size: 12px;
+    border-radius: 4px; max-width: 200px;
+  }
+  .qb-left-nav div {
+    padding: 5px 8px; border-radius: 3px;
+  }
+  .qb-left-nav .highlight-nav { background: #2ca01c; }
+
+  /* Quiz */
+  .quiz {
+    background: #f0f7ff; border: 1px solid #cce0ff;
+    padding: 20px; border-radius: 10px; margin: 16px 0;
+  }
+  .quiz h4 { color: #0066cc; margin-bottom: 10px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .quiz-option {
+    background: white; border: 1px solid #cce0ff;
+    padding: 10px 14px; border-radius: 6px; cursor: pointer;
+    font-size: 14px; transition: all 0.15s;
+  }
+  .quiz-option:hover { border-color: #0066cc; }
+  .quiz-option.correct { background: #e8f6e6; border-color: #2ca01c; color: #1f7a14; font-weight: 600; }
+  .quiz-option.wrong { background: #fde7e9; border-color: #e63946; color: #c1272d; }
+
+  /* Mark complete button */
+  .complete-bar {
+    display: flex; gap: 12px; justify-content: space-between;
+    align-items: center; margin-top: 28px;
+    padding: 20px; background: white; border: 1px solid #e3e8ee; border-radius: 10px;
+  }
+  .complete-btn {
+    background: #2ca01c; color: white; border: none;
+    padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .complete-btn:hover { background: #1f7a14; transform: translateY(-1px); }
+  .complete-btn.done { background: #6b7c93; }
+  .nav-arrows { display: flex; gap: 10px; }
+  .nav-arrow-btn {
+    background: white; border: 1px solid #d1dae3; color: #324a5e;
+    padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px;
+  }
+  .nav-arrow-btn:hover { background: #f4f7fa; }
+
+  /* Pill labels */
+  .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pill.essential { background: #2ca01c; color: white; }
+  .pill.later { background: #f0f4f8; color: #6b7c93; }
+  .pill.warn { background: #f5b500; color: white; }
+
+  table.compare {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    font-size: 14px;
+  }
+  table.compare th, table.compare td {
+    border: 1px solid #e3e8ee; padding: 10px 12px; text-align: left;
+  }
+  table.compare th { background: #f0f4f8; font-weight: 600; }
+  table.compare tr:nth-child(even) td { background: #f8fafb; }
+
+  @media (max-width: 900px) {
+    body { grid-template-columns: 1fr; }
+    aside { position: static; max-height: none; }
+    main { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>QuickBooks Mastery <span>· 2-Week VA Training Dashboard</span></h1>
+  <div class="progress-wrap">
+    <span class="progress-text" id="progressText">0 of 13 complete</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <button id="resetBtn">Reset</button>
+  </div>
+</header>
+
+<aside>
+  <div class="week-label">Week 1 · Foundations</div>
+  <div class="nav-item active" data-lesson="intro">
+    <div class="nav-check"></div>
+    <div><div>Welcome & How to Use This</div><div class="nav-day">Start here</div></div>
+  </div>
+  <div class="nav-item" data-lesson="d1">
+    <div class="nav-check"></div>
+    <div><div>What VAs Actually Need</div><div class="nav-day">Day 1</div></div>
+  </div>
+  <div class="nav-item" data-lesson="d2">
+    <div class="nav-check"></div>
+    <div><div>The QuickBooks Interface</div><div class="nav-day">Day 2</div></div>
+  </div>
+  <div class="nav-item" data-lesson="d3">
+    <div class="nav-check"></div>
+    <div><div>Customers, Vendors & COA</div><div class="nav-day">Day 3</div></div>
+  </div>
+  <div class="nav-item" data-lesson="d4">
+    <div class="nav-check"></div>
+    <div><div>Money Words in Plain English</div><div class="nav-day">Day 4</div></div>
+  </div>
+  <div class="nav-item" data-lesson="d5">
+    <div class="nav-check"></div>
+    <div><div>Week 1 Practice & Review</div><div class="nav-day">Day 5</div></div>
+  </div>
+
+  <div class="week-label">Week 2 · Daily SOPs</div>
+  <div class="nav-item" data-lesson="sop1">
+    <div class="nav-check"></div>
+    <div><div>SOP 1 · Create an Invoice</div><div class="nav-day">Day 6</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop2">
+    <div class="nav-check"></div>
+    <div><div>SOP 2 · Record a Payment</div><div class="nav-day">Day 7</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop3">
+    <div class="nav-check"></div>
+    <div><div>SOP 3 · Issue a Sales Receipt</div><div class="nav-day">Day 8</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop4">
+    <div class="nav-check"></div>
+    <div><div>SOP 4 · Record an Expense</div><div class="nav-day">Day 9</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop5">
+    <div class="nav-check"></div>
+    <div><div>SOP 5 · Enter & Pay a Bill</div><div class="nav-day">Day 10</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop6">
+    <div class="nav-check"></div>
+    <div><div>SOP 6 · Add Customer/Vendor</div><div class="nav-day">Day 11</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop7">
+    <div class="nav-check"></div>
+    <div><div>SOP 7 · Categorize Bank Feed</div><div class="nav-day">Day 12</div></div>
+  </div>
+  <div class="nav-item" data-lesson="sop8">
+    <div class="nav-check"></div>
+    <div><div>SOP 8 · Run Basic Reports</div><div class="nav-day">Day 13</div></div>
+  </div>
+  <div class="nav-item" data-lesson="final">
+    <div class="nav-check"></div>
+    <div><div>Final Checklist & Cheat Sheet</div><div class="nav-day">Day 14</div></div>
+  </div>
+</aside>
+
+<main>
+
+<!-- INTRO -->
+<section class="lesson active" id="intro">
+  <div class="breadcrumb">Start here</div>
+  <h2>Welcome — You've got this</h2>
+  <p class="subtitle">A friendly 2-week path from "What's QuickBooks?" to "I can run the daily bookkeeping for my client."</p>
+
+  <div class="content-block">
+    <h3>How this dashboard works</h3>
+    <p>This guide takes about 1 to 2 weeks if you spend roughly 45 minutes a day on it. Each lesson lives on the left sidebar. Click through them in order. When you finish a lesson, hit the green <strong>Mark Complete</strong> button at the bottom — you'll see your progress fill the bar at the top.</p>
+    <p>Your progress is saved automatically in this browser. If you reset, it clears everything.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>The promise</h3>
+    <p>At the end of two weeks, you will be able to honestly say: <em>"Yes, I know my way around QuickBooks."</em> You will not be a CPA. You will not file taxes. But you'll be able to do the day-to-day work that most clients hire VAs for: sending invoices, recording payments, tracking expenses, and pulling simple reports.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>One promise back from you</h3>
+    <div class="danger"><strong>Rule #1:</strong> When you're not sure where something goes, ASK your client or their accountant. Bookkeeping is forgiving when you communicate. It is unforgiving when you guess.</div>
+  </div>
+
+  <div class="complete-bar">
+    <div></div>
+    <button class="complete-btn" onclick="markComplete('intro')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- DAY 1 -->
+<section class="lesson" id="d1">
+  <div class="breadcrumb">Week 1 · Foundations · Day 1</div>
+  <h2>What a VA Actually Needs to Know</h2>
+  <p class="subtitle">Essential vs. "you can learn this later." Knowing the difference saves you weeks.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Understand what QuickBooks is in plain English.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Be able to tell a friend what your client uses it for.</p></div>
+    <div class="obj-block"><h4>Time</h4><p>~30 minutes</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>What is QuickBooks?</h3>
+    <p>QuickBooks Online (often shortened to <strong>QBO</strong>) is a website that small businesses use to keep track of money. That's it. It records two main things: <strong>money coming in</strong> (someone paid them) and <strong>money going out</strong> (they paid for something). Everything else is just organizing those two things into pretty reports.</p>
+    <p>Think of it like the food diary of a business. Instead of writing down what you ate, you write down every dollar that moved.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Why your client hired you to use it</h3>
+    <p>Business owners hate doing this. They are good at selling cookies or styling hair or coaching CEOs. They are usually not good at, or interested in, typing receipts into a computer. That's where you come in. You handle the boring-but-important typing so they can focus on the work that earns the money.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>What you NEED to know — the essential 8</h3>
+    <p>If you can do these eight things, 90% of clients are thrilled with you:</p>
+    <ol>
+      <li><span class="pill essential">Essential</span> &nbsp; Log in and find your way around the dashboard</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Create and send an invoice to a customer</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Record a payment when a customer pays</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Issue a sales receipt for paid-on-the-spot sales</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Record an expense (something the business bought)</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Enter a bill that the business owes</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Categorize new bank transactions in the bank feed</li>
+      <li><span class="pill essential">Essential</span> &nbsp; Run a Profit & Loss report and a Balance Sheet</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>What you can learn LATER (don't worry about these yet)</h3>
+    <ul>
+      <li><span class="pill later">Later</span> &nbsp; Payroll — usually a CPA or payroll specialist handles it.</li>
+      <li><span class="pill later">Later</span> &nbsp; Sales tax filing — leave this to the accountant.</li>
+      <li><span class="pill later">Later</span> &nbsp; Journal entries — almost never something a beginner VA should touch.</li>
+      <li><span class="pill later">Later</span> &nbsp; Bank reconciliation (the formal monthly close) — observe at first.</li>
+      <li><span class="pill later">Later</span> &nbsp; Setting up a new company file — your client already has one.</li>
+      <li><span class="pill later">Later</span> &nbsp; Inventory tracking — only if the business sells physical products.</li>
+    </ul>
+    <div class="highlight"><strong>Translation:</strong> Your job is everyday data entry. Bigger decisions belong to the accountant. Stay in your lane and you'll be a star.</div>
+  </div>
+
+  <div class="content-block">
+    <h3>The three numbers your client actually cares about</h3>
+    <p>When you understand these three, you understand 80% of what bookkeeping is for:</p>
+    <ul>
+      <li><strong>Revenue</strong> — total money the business brought in.</li>
+      <li><strong>Expenses</strong> — total money the business spent.</li>
+      <li><strong>Profit</strong> — what's left when you subtract expenses from revenue. <em>Revenue minus Expenses = Profit.</em></li>
+    </ul>
+    <p>Every single thing you do in QuickBooks ends up affecting one of these three numbers.</p>
+  </div>
+
+  <div class="quiz">
+    <h4>Quick check</h4>
+    <p>A customer pays your client $500 for a service. Which number does this affect?</p>
+    <div class="quiz-options">
+      <div class="quiz-option" onclick="answer(this, false)">Expenses</div>
+      <div class="quiz-option" onclick="answer(this, true)">Revenue</div>
+      <div class="quiz-option" onclick="answer(this, false)">Neither</div>
+    </div>
+  </div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('intro')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('d1')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- DAY 2 -->
+<section class="lesson" id="d2">
+  <div class="breadcrumb">Week 1 · Foundations · Day 2</div>
+  <h2>The QuickBooks Interface</h2>
+  <p class="subtitle">A guided tour of the buttons you'll use every single day.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Know where every important button lives.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Find any feature in under 10 seconds.</p></div>
+    <div class="obj-block"><h4>Time</h4><p>~45 minutes</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>Getting in</h3>
+    <p>QuickBooks Online lives at <strong>qbo.intuit.com</strong>. Your client gives you a username and password (or invites you to their account). Bookmark this URL — you'll open it every day.</p>
+    <div class="highlight"><strong>Security tip:</strong> Never share your login. If another VA needs access, ask your client to invite them with their own login.</div>
+  </div>
+
+  <div class="content-block">
+    <h3>The screen at a glance</h3>
+    <p>After you log in, the screen splits into three zones:</p>
+
+    <div class="qb-mock">
+      <div class="qb-mock-header">
+        <span>QuickBooks Online · Dashboard</span>
+        <span>⚙️ &nbsp; ? &nbsp; 🔍 &nbsp; + New</span>
+      </div>
+      <div class="qb-mock-body" style="display: grid; grid-template-columns: 200px 1fr; gap: 14px;">
+        <div class="qb-left-nav">
+          <div>🏠 Dashboard</div>
+          <div>💳 Banking</div>
+          <div>🧾 Sales</div>
+          <div>👥 Customers</div>
+          <div>💸 Expenses</div>
+          <div>🏪 Vendors</div>
+          <div>📊 Reports</div>
+          <div>💼 Taxes</div>
+          <div>⚙️ Accounting</div>
+        </div>
+        <div>
+          <div class="qb-field"><strong>Profit & Loss this month:</strong> $4,250</div>
+          <div class="qb-field"><strong>Open Invoices:</strong> 3 invoices · $2,100 due</div>
+          <div class="qb-field"><strong>Expenses this week:</strong> $620</div>
+          <p style="margin-top: 10px; font-size: 12px; color: #6b7c93;">↑ This is what your home screen looks like. The colored numbers are clickable.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h3>The four buttons you'll wear out</h3>
+
+    <p><strong>1. The "+ New" button</strong> (top left, big green or blue button)</p>
+    <p>This is your most-clicked button. Every time you want to create something — invoice, expense, sales receipt, bill, customer, payment — you start here. When you click it, a menu pops up with four columns: <em>Customers, Vendors, Employees, Other</em>.</p>
+
+    <div class="qb-mock">
+      <div class="qb-mock-header">+ New menu</div>
+      <div class="qb-mock-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; font-size: 12px;">
+        <div>
+          <strong style="color:#2ca01c;">CUSTOMERS</strong>
+          <div class="qb-field">Invoice</div>
+          <div class="qb-field">Receive payment</div>
+          <div class="qb-field">Sales receipt</div>
+          <div class="qb-field">Estimate</div>
+          <div class="qb-field">Credit memo</div>
+        </div>
+        <div>
+          <strong style="color:#2ca01c;">VENDORS</strong>
+          <div class="qb-field">Expense</div>
+          <div class="qb-field">Check</div>
+          <div class="qb-field">Bill</div>
+          <div class="qb-field">Pay bills</div>
+          <div class="qb-field">Purchase order</div>
+        </div>
+        <div>
+          <strong style="color:#2ca01c;">EMPLOYEES</strong>
+          <div class="qb-field">Payroll</div>
+          <div class="qb-field">Single time activity</div>
+        </div>
+        <div>
+          <strong style="color:#2ca01c;">OTHER</strong>
+          <div class="qb-field">Bank deposit</div>
+          <div class="qb-field">Transfer</div>
+          <div class="qb-field">Journal entry</div>
+          <div class="qb-field">Statement</div>
+        </div>
+      </div>
+    </div>
+
+    <p><strong>2. The Gear icon</strong> (top right, looks like ⚙️) — this is settings. You won't touch this much. Useful for changing the company logo or finding the list of customers.</p>
+
+    <p><strong>3. The Search icon</strong> (magnifying glass at top right) — type any number or name and QuickBooks finds the transaction.</p>
+
+    <p><strong>4. The left sidebar</strong> — the long list down the left side. This is how you navigate to bigger sections (Banking, Sales, Reports, etc.).</p>
+  </div>
+
+  <div class="content-block">
+    <h3>What each sidebar tab does (in plain English)</h3>
+    <table class="compare">
+      <tr><th>Tab</th><th>What it's for</th></tr>
+      <tr><td><strong>Dashboard</strong></td><td>Your home — a quick snapshot of money.</td></tr>
+      <tr><td><strong>Banking</strong></td><td>The bank feed — new transactions waiting to be categorized.</td></tr>
+      <tr><td><strong>Sales</strong></td><td>All invoices, receipts, estimates.</td></tr>
+      <tr><td><strong>Customers</strong></td><td>The list of people who pay your client.</td></tr>
+      <tr><td><strong>Expenses</strong></td><td>All purchases and bills.</td></tr>
+      <tr><td><strong>Vendors</strong></td><td>The list of people your client pays.</td></tr>
+      <tr><td><strong>Reports</strong></td><td>The pretty summaries — P&L, Balance Sheet, etc.</td></tr>
+      <tr><td><strong>Taxes</strong></td><td>Sales tax setup. Usually accountant territory.</td></tr>
+      <tr><td><strong>Accounting</strong></td><td>The Chart of Accounts and reconciliation. Use carefully.</td></tr>
+    </table>
+  </div>
+
+  <div class="success"><strong>Try it:</strong> Log into QuickBooks (sandbox if you don't have client access yet — go to qbo.intuit.com/redir/testdrive). Click every tab on the left once. Don't touch anything, just look. This 5-minute tour pays off forever.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('d1')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('d2')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- DAY 3 -->
+<section class="lesson" id="d3">
+  <div class="breadcrumb">Week 1 · Foundations · Day 3</div>
+  <h2>Customers, Vendors & the Chart of Accounts</h2>
+  <p class="subtitle">Three lists that QuickBooks runs on. Master these and the rest is easy.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Understand the three master lists in QBO.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Never confuse a customer with a vendor again.</p></div>
+    <div class="obj-block"><h4>Time</h4><p>~40 minutes</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>Customer vs Vendor — the simplest test in the world</h3>
+    <table class="compare">
+      <tr><th>Customer</th><th>Vendor</th></tr>
+      <tr><td>Pays your client money 💰</td><td>Receives money from your client 💸</td></tr>
+      <tr><td>Example: A buyer of services</td><td>Example: The internet company</td></tr>
+      <tr><td>Lives under the "Customers" tab</td><td>Lives under the "Vendors" tab</td></tr>
+    </table>
+    <p>That's it. Money flows IN from a customer. Money flows OUT to a vendor. If you remember nothing else from today, remember that arrow direction.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>What's a Chart of Accounts?</h3>
+    <p>The <strong>Chart of Accounts</strong> (or "COA" if someone's feeling fancy) is just a list of buckets. Every dollar moving in or out of the business has to go into one of these buckets.</p>
+    <p>Typical buckets a small business might have:</p>
+    <ul>
+      <li>Sales (money in)</li>
+      <li>Consulting Income (money in)</li>
+      <li>Office Supplies (money out)</li>
+      <li>Rent (money out)</li>
+      <li>Internet & Phone (money out)</li>
+      <li>Meals & Entertainment (money out)</li>
+      <li>Software Subscriptions (money out)</li>
+    </ul>
+    <p>When you record a $50 trip to Staples, you'd put that under "Office Supplies." When a customer pays $400 for consulting, that goes under "Consulting Income." You're sorting laundry into the right baskets.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Where to find these lists</h3>
+
+    <p><strong>Customer list:</strong> Left sidebar → Sales → Customers (or just Customers tab if it's there)</p>
+    <div class="qb-mock">
+      <div class="qb-mock-header">Customers</div>
+      <div class="qb-mock-body">
+        <div class="qb-field">Acme Inc. · Owes $1,200 · last invoice May 1</div>
+        <div class="qb-field">Maria Lopez · Owes $0 · paid in full</div>
+        <div class="qb-field">Beta Co. · Owes $400 · 12 days overdue ⚠️</div>
+        <span class="qb-btn">+ New customer</span>
+      </div>
+    </div>
+
+    <p><strong>Vendor list:</strong> Left sidebar → Expenses → Vendors</p>
+    <div class="qb-mock">
+      <div class="qb-mock-header">Vendors</div>
+      <div class="qb-mock-body">
+        <div class="qb-field">Comcast · $89/mo · last paid May 3</div>
+        <div class="qb-field">Staples · varies · last paid Apr 28</div>
+        <div class="qb-field">Adobe · $54.99/mo · auto-pay</div>
+        <span class="qb-btn">+ New vendor</span>
+      </div>
+    </div>
+
+    <p><strong>Chart of Accounts:</strong> Left sidebar → Accounting → Chart of Accounts</p>
+    <div class="highlight"><strong>Caution:</strong> The Chart of Accounts is sensitive. Don't add new accounts or rename anything without asking your client or their accountant. You can <em>look</em> all you want.</div>
+  </div>
+
+  <div class="quiz">
+    <h4>Quick check</h4>
+    <p>Your client pays the company that hosts their website. Which list does that company go on?</p>
+    <div class="quiz-options">
+      <div class="quiz-option" onclick="answer(this, false)">Customers</div>
+      <div class="quiz-option" onclick="answer(this, true)">Vendors</div>
+      <div class="quiz-option" onclick="answer(this, false)">Chart of Accounts</div>
+    </div>
+  </div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('d2')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('d3')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- DAY 4 -->
+<section class="lesson" id="d4">
+  <div class="breadcrumb">Week 1 · Foundations · Day 4</div>
+  <h2>Money Words, Explained Like You're 15</h2>
+  <p class="subtitle">The 10 accounting words that scare beginners — translated.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>De-mystify accounting vocabulary.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Hear any of these words without panicking.</p></div>
+    <div class="obj-block"><h4>Time</h4><p>~40 minutes</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>The translation table</h3>
+    <table class="compare">
+      <tr><th>Fancy word</th><th>Plain English</th></tr>
+      <tr><td>Revenue / Income</td><td>Money the business earned.</td></tr>
+      <tr><td>Expense</td><td>Money the business spent.</td></tr>
+      <tr><td>Asset</td><td>Stuff the business owns (cash in the bank, a laptop, a delivery van).</td></tr>
+      <tr><td>Liability</td><td>Money the business owes (credit card balance, a loan).</td></tr>
+      <tr><td>Equity</td><td>What's left for the owner after subtracting what they owe from what they own.</td></tr>
+      <tr><td>Accounts Receivable (A/R)</td><td>Money customers owe to the business.</td></tr>
+      <tr><td>Accounts Payable (A/P)</td><td>Money the business owes to vendors.</td></tr>
+      <tr><td>Invoice</td><td>A "please pay me" bill the business sends to a customer.</td></tr>
+      <tr><td>Bill</td><td>A "please pay me" bill the business receives from a vendor.</td></tr>
+      <tr><td>Reconcile</td><td>Comparing the bank statement to QuickBooks to make sure they match.</td></tr>
+    </table>
+  </div>
+
+  <div class="content-block">
+    <h3>The two flows you'll do all day</h3>
+    <p><strong>Money coming in (sales flow):</strong></p>
+    <ol>
+      <li>You create an <strong>invoice</strong> for the customer.</li>
+      <li>The customer eventually pays.</li>
+      <li>You record the <strong>payment</strong> in QuickBooks against that invoice.</li>
+    </ol>
+    <p><strong>Money going out (purchase flow):</strong></p>
+    <ol>
+      <li>The vendor sends a <strong>bill</strong> (or your client buys something directly).</li>
+      <li>Your client pays.</li>
+      <li>You record the <strong>expense</strong> or <strong>bill payment</strong> in QuickBooks.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Invoice vs Sales Receipt — the difference</h3>
+    <p>Both record a sale. The difference is timing:</p>
+    <table class="compare">
+      <tr><th>Invoice</th><th>Sales Receipt</th></tr>
+      <tr><td>Customer will pay later</td><td>Customer pays right now</td></tr>
+      <tr><td>Use for B2B work, services, anything billed</td><td>Use for retail, on-the-spot sales, deposits</td></tr>
+      <tr><td>Creates Accounts Receivable until paid</td><td>Goes straight to income — done in one step</td></tr>
+    </table>
+    <div class="highlight"><strong>Memory trick:</strong> Invoice = "I'll pay later." Sales Receipt = "Here's your money now."</div>
+  </div>
+
+  <div class="content-block">
+    <h3>Expense vs Bill — the difference</h3>
+    <table class="compare">
+      <tr><th>Expense</th><th>Bill</th></tr>
+      <tr><td>Already paid — just recording it</td><td>Will pay later — recording what's owed</td></tr>
+      <tr><td>Use when client swipes their card</td><td>Use when vendor sends an invoice to be paid in 30 days</td></tr>
+    </table>
+  </div>
+
+  <div class="quiz">
+    <h4>Quick check</h4>
+    <p>A customer hands cash to your client at a craft fair for a $40 candle. Which do you create?</p>
+    <div class="quiz-options">
+      <div class="quiz-option" onclick="answer(this, false)">Invoice</div>
+      <div class="quiz-option" onclick="answer(this, true)">Sales Receipt</div>
+      <div class="quiz-option" onclick="answer(this, false)">Bill</div>
+    </div>
+  </div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('d3')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('d4')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- DAY 5 -->
+<section class="lesson" id="d5">
+  <div class="breadcrumb">Week 1 · Foundations · Day 5</div>
+  <h2>Week 1 Practice & Review</h2>
+  <p class="subtitle">Cement the basics before we dive into the daily SOPs next week.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Apply Week 1 knowledge in QBO's free sandbox.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Click everything from Week 1 with confidence.</p></div>
+    <div class="obj-block"><h4>Time</h4><p>~60 minutes</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>The free sandbox (your safe playground)</h3>
+    <p>Intuit gives anyone a free test version of QuickBooks Online with fake company data. You can break, click, and explore as much as you want — nothing is real.</p>
+    <ol class="steps">
+      <li>Open a new browser tab and go to <strong>qbo.intuit.com/redir/testdrive</strong></li>
+      <li>Solve the captcha and you're in. You're now logged in as "Craig's Design and Landscaping."</li>
+      <li>The data resets every few hours. So feel free to mess up. Nothing is permanent.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Today's 6 tasks</h3>
+    <p>Inside the sandbox, do each of these. Don't read about them — actually click them.</p>
+    <ul>
+      <li>✅ Find the "+ New" button and open the menu. Close it without creating anything.</li>
+      <li>✅ Click Sales → Customers. Find a customer named "Amy" and open her profile.</li>
+      <li>✅ Click Expenses → Vendors. Find a vendor and look at their recent transactions.</li>
+      <li>✅ Click Reports → "Profit and Loss." Notice the dollar amounts and the date range filter at the top.</li>
+      <li>✅ Click Accounting → Chart of Accounts. Scroll down. Count how many accounts there are.</li>
+      <li>✅ Hover over the gear icon. Don't click anything dangerous. Just look at the menu.</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Week 1 self-assessment</h3>
+    <p>You're ready for Week 2 if you can answer all of these out loud:</p>
+    <ul>
+      <li>What is QuickBooks Online in one sentence?</li>
+      <li>What's the difference between a customer and a vendor?</li>
+      <li>Where is the "+ New" button?</li>
+      <li>What's the difference between an invoice and a sales receipt?</li>
+      <li>What's the difference between an expense and a bill?</li>
+      <li>What is the Chart of Accounts for?</li>
+      <li>What are the three numbers every business owner cares about?</li>
+    </ul>
+    <div class="success">If any of these stumped you, no worries — flip back to the relevant day. Repetition is the secret weapon of every great VA.</div>
+  </div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('d4')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('d5')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 1 -->
+<section class="lesson" id="sop1">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 6</div>
+  <h2>SOP 1 · Create an Invoice</h2>
+  <p class="subtitle">The single most common task you'll do. Master this and you're 25% of the way to "useful VA."</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Generate a professional invoice for a customer.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Send a clean invoice in under 3 minutes.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>You'll record what was sold, to whom, and email it out.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>When to use this SOP</h3>
+    <p>Use this any time your client tells you, "Please send an invoice to ___ for ___." If the customer will pay <em>later</em> (not on the spot), this is the right tool.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Before you start, you need</h3>
+    <ul>
+      <li>Customer name (already in QuickBooks? If not, add them first — SOP 6)</li>
+      <li>What was sold (the service or product)</li>
+      <li>How much to charge</li>
+      <li>Payment terms (usually "Net 30" — means due in 30 days)</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Step-by-step</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong> in the top-left corner of QuickBooks.</li>
+      <li>Under the "Customers" column, click <strong>Invoice</strong>. A blank invoice form opens.</li>
+      <li>In the <strong>Customer</strong> field at the top, click the dropdown and pick your customer's name. (If they're not listed, save the invoice as a draft and add them via SOP 6 first.)</li>
+      <li>Confirm the <strong>Invoice date</strong> is today. Set <strong>Terms</strong> to "Net 30" unless your client says otherwise. The <strong>Due date</strong> auto-fills.</li>
+      <li>In the line items area, click <strong>Product/Service</strong> and pick the right item from the dropdown (e.g., "Consulting Hours," "Web Design Package").</li>
+      <li>Type a clear <strong>Description</strong> — what the customer actually got. "Logo design — 3 concepts" is better than "design work."</li>
+      <li>Enter <strong>Quantity</strong> and <strong>Rate</strong>. The amount calculates automatically.</li>
+      <li>If there's more than one item, click <strong>Add lines</strong> and repeat.</li>
+      <li>(Optional) Add a message in <strong>Message on invoice</strong> — something like "Thanks for your business!" — your client appreciates the warmth.</li>
+      <li>Look at the total. Does it match what your client asked for? If yes, continue. If no, fix it.</li>
+      <li>Click <strong>Save and send</strong> (bottom right). A preview pops up — confirm the customer's email is correct.</li>
+      <li>Click <strong>Send and close</strong>. Done. The customer just got an invoice in their inbox.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>What the screen looks like</h3>
+    <div class="qb-mock">
+      <div class="qb-mock-header">
+        <span>Invoice · # 1042</span>
+        <span>Total: $750.00</span>
+      </div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Customer:</strong> Beta Co. <span class="qb-arrow">← pick from dropdown</span></div>
+        <div class="qb-field"><strong>Email:</strong> billing@betaco.com</div>
+        <div class="qb-field"><strong>Invoice date:</strong> 05/16/2026 &nbsp; <strong>Terms:</strong> Net 30 &nbsp; <strong>Due:</strong> 06/15/2026</div>
+        <div style="margin-top:8px;font-size:11px;color:#6b7c93;">PRODUCT/SERVICE · DESCRIPTION · QTY · RATE · AMOUNT</div>
+        <div class="qb-field">Consulting Hours · Strategy session · 5 · $150 · $750.00</div>
+        <div class="qb-field"><strong>Message:</strong> Thanks for your business!</div>
+        <div style="margin-top:10px;">
+          <span class="qb-btn">Save and send</span>
+          <span class="qb-btn ghost">Save</span>
+          <span class="qb-btn gray">Cancel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight"><strong>Common mistake:</strong> Hitting "Save and close" instead of "Save and send." Saving doesn't email the customer — they'll never know to pay. Always send.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('d5')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop1')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 2 -->
+<section class="lesson" id="sop2">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 7</div>
+  <h2>SOP 2 · Record a Payment</h2>
+  <p class="subtitle">When the customer finally pays the invoice you sent, this is how you close the loop.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Mark an invoice as paid in QuickBooks.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Apply payment to the correct invoice every time.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Match incoming money to an open invoice.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>When to use this SOP</h3>
+    <p>Use this whenever a customer pays an existing invoice. The money might come in via check, bank transfer, Stripe, PayPal, or cash. Doesn't matter how — if there's an invoice waiting, you "receive payment" against it.</p>
+    <div class="danger"><strong>Important:</strong> Do NOT just create a sales receipt or a deposit. That would double-count the income. The invoice already counts the sale. Always use "Receive payment."</div>
+  </div>
+
+  <div class="content-block">
+    <h3>Before you start, you need</h3>
+    <ul>
+      <li>The customer's name</li>
+      <li>How much they paid (exact amount)</li>
+      <li>The date they paid</li>
+      <li>How they paid (check #, bank deposit, credit card, etc.)</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Step-by-step</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong>.</li>
+      <li>Under "Customers," click <strong>Receive payment</strong>.</li>
+      <li>In the <strong>Customer</strong> dropdown, pick the customer who paid. Their open invoices appear below.</li>
+      <li>Set the <strong>Payment date</strong> to the actual date the money was received.</li>
+      <li>Pick the <strong>Payment method</strong> (Check, Credit card, Bank transfer, etc.).</li>
+      <li>If they paid by check, type the <strong>Reference no.</strong> (the check number).</li>
+      <li>In <strong>Deposit to</strong>, pick the bank account the money landed in (usually "Checking" or "Undeposited Funds" — ask your client which one they use).</li>
+      <li>In the invoices list below, check the box next to the invoice they're paying. The amount usually fills in automatically.</li>
+      <li>Confirm the <strong>Amount received</strong> at the top matches what they actually paid.</li>
+      <li>Click <strong>Save and close</strong>. The invoice is now marked PAID.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">
+        <span>Receive Payment</span>
+        <span>Amount: $750.00</span>
+      </div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Customer:</strong> Beta Co.</div>
+        <div class="qb-field"><strong>Payment date:</strong> 05/16/2026 &nbsp; <strong>Method:</strong> Bank transfer</div>
+        <div class="qb-field"><strong>Deposit to:</strong> Checking</div>
+        <div style="margin-top:8px;font-size:11px;color:#6b7c93;">OPEN INVOICES (check the one being paid)</div>
+        <div class="qb-field">☑ Invoice 1042 · Due 06/15 · $750.00 <span class="qb-arrow">← check this box</span></div>
+        <div class="qb-field">☐ Invoice 1051 · Due 06/30 · $250.00</div>
+        <div style="margin-top:10px;">
+          <span class="qb-btn">Save and close</span>
+          <span class="qb-btn gray">Cancel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight"><strong>Partial payments are okay:</strong> If a customer pays $400 on a $750 invoice, just type 400 in the "Payment" column next to that invoice. QuickBooks tracks the remaining $350 as still owed.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop1')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop2')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 3 -->
+<section class="lesson" id="sop3">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 8</div>
+  <h2>SOP 3 · Issue a Sales Receipt</h2>
+  <p class="subtitle">For when the customer pays on the spot — a one-step combo of "invoice + payment."</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Record a paid-on-the-spot sale.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Email a clean receipt to the customer.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Use this for retail, walk-in, or instant-pay sales.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>When to use this SOP</h3>
+    <p>Use when the customer paid <em>before or at the moment</em> the sale was made. Examples:</p>
+    <ul>
+      <li>Someone bought a candle at a craft fair (paid cash)</li>
+      <li>An online sale through Stripe/Square</li>
+      <li>A workshop attendee paid via Venmo before the class</li>
+    </ul>
+    <p>If they'll pay later, use SOP 1 (Invoice) instead.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Step-by-step</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong>.</li>
+      <li>Under "Customers," click <strong>Sales receipt</strong>.</li>
+      <li>Pick the <strong>Customer</strong>. (For one-off retail sales, your client may use a generic name like "Walk-in Customer.")</li>
+      <li>Set the <strong>Sales receipt date</strong> to the day the sale happened.</li>
+      <li>Pick the <strong>Payment method</strong> and (if a check) enter the reference number.</li>
+      <li>In <strong>Deposit to</strong>, choose the account where the money went.</li>
+      <li>Add line items: <strong>Product/Service</strong>, <strong>Description</strong>, <strong>Qty</strong>, <strong>Rate</strong>.</li>
+      <li>Double-check the total. Does it match what the customer actually paid?</li>
+      <li>Click <strong>Save and send</strong> if they want an email receipt, or <strong>Save and close</strong> if not.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">
+        <span>Sales Receipt · # SR-220</span>
+        <span>Paid: $40.00</span>
+      </div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Customer:</strong> Walk-in Customer</div>
+        <div class="qb-field"><strong>Date:</strong> 05/16/2026 &nbsp; <strong>Method:</strong> Cash &nbsp; <strong>Deposit to:</strong> Cash Drawer</div>
+        <div class="qb-field">Lavender Candle · Hand-poured 8oz · 1 · $40 · $40.00</div>
+        <div style="margin-top:10px;">
+          <span class="qb-btn">Save and send</span>
+          <span class="qb-btn ghost">Save and close</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success"><strong>Two-second rule:</strong> Before saving anything in QuickBooks, ask "Did money already change hands?" If yes → Sales Receipt. If no → Invoice. That's the whole decision tree.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop2')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop3')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 4 -->
+<section class="lesson" id="sop4">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 9</div>
+  <h2>SOP 4 · Record an Expense</h2>
+  <p class="subtitle">Every dollar your client spends has to be tracked — here's how to log it cleanly.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Record a purchase the business already paid for.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Categorize every expense correctly.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Capture the date, vendor, amount, and category of any out-going dollar.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>When to use this SOP</h3>
+    <p>Use this when your client paid for something already (their card was swiped, money was sent, check was written). It's about <em>recording history</em>, not paying a future bill.</p>
+    <p>Examples: gas for the work van, lunch with a client, a $20 Canva subscription, office supplies from Staples.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Before you start, you need</h3>
+    <ul>
+      <li>A receipt (paper, email, or photo) — always file or attach this</li>
+      <li>Vendor name (who got paid)</li>
+      <li>Amount</li>
+      <li>Date</li>
+      <li>Payment method (which card or bank account)</li>
+      <li>The category the expense fits (Office Supplies? Meals? Travel?)</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>Step-by-step</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong>.</li>
+      <li>Under "Vendors," click <strong>Expense</strong>.</li>
+      <li>In <strong>Payee</strong>, pick the vendor. If they're not in the list, click "+ Add new."</li>
+      <li>Pick the <strong>Payment account</strong> (which card or bank paid for this).</li>
+      <li>Set the <strong>Payment date</strong> to the day the money actually left.</li>
+      <li>Pick the <strong>Payment method</strong> (Credit card, debit, cash, etc.).</li>
+      <li>(Optional) Type a <strong>Ref no.</strong> like a check number or transaction ID.</li>
+      <li>Under <strong>Category</strong>, pick the right bucket from the Chart of Accounts (e.g., "Office Supplies," "Software," "Meals & Entertainment").</li>
+      <li>Type a <strong>Description</strong> — your future self will thank you. "Staples - printer ink and paper" is way better than "stuff."</li>
+      <li>Enter the <strong>Amount</strong>.</li>
+      <li>Click the paperclip icon at the bottom to attach the receipt image. Always do this. Your accountant will love you.</li>
+      <li>Click <strong>Save and close</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">
+        <span>Expense</span>
+        <span>Total: $87.42</span>
+      </div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Payee:</strong> Staples</div>
+        <div class="qb-field"><strong>Payment account:</strong> Business Visa ····4521</div>
+        <div class="qb-field"><strong>Date:</strong> 05/14/2026 &nbsp; <strong>Method:</strong> Credit card</div>
+        <div style="margin-top:8px;font-size:11px;color:#6b7c93;">CATEGORY · DESCRIPTION · AMOUNT</div>
+        <div class="qb-field">Office Supplies · Printer ink + paper · $87.42</div>
+        <div class="qb-field">📎 Attachment: staples-receipt-may14.jpg</div>
+        <div style="margin-top:10px;"><span class="qb-btn">Save and close</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="danger"><strong>If you don't know the category:</strong> STOP. Don't guess. Put it in a category your client uses for "uncategorized" or message them with the receipt and ask. Wrong categories cause tax problems.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop3')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop4')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 5 -->
+<section class="lesson" id="sop5">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 10</div>
+  <h2>SOP 5 · Enter & Pay a Bill</h2>
+  <p class="subtitle">For when a vendor sends an invoice your client will pay later.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Track money the business will owe and pay it on time.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Enter the bill today, pay it when it's due.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Two steps: enter the bill, then later record the payment against it.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>When to use this SOP</h3>
+    <p>Use when a vendor sends a bill with a due date in the future. Examples:</p>
+    <ul>
+      <li>The printer sent an invoice for $500, due in 30 days</li>
+      <li>The web developer billed $2,000, payable next month</li>
+      <li>The landlord sent the May rent bill, due June 1</li>
+    </ul>
+    <p>If your client already paid for it, that's an Expense (SOP 4), not a Bill.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Part 1 · Enter the bill</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong>.</li>
+      <li>Under "Vendors," click <strong>Bill</strong>.</li>
+      <li>Pick the <strong>Vendor</strong>.</li>
+      <li>Set the <strong>Bill date</strong> (the date on the vendor's invoice) and <strong>Due date</strong> (when they expect to be paid).</li>
+      <li>Type the <strong>Bill no.</strong> from the vendor's invoice.</li>
+      <li>Under <strong>Category details</strong>, pick the right category, type a description, and enter the amount.</li>
+      <li>Attach the bill PDF using the paperclip icon.</li>
+      <li>Click <strong>Save and close</strong>. The bill is now in the system as money owed.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Part 2 · Pay the bill (when it's time)</h3>
+    <ol class="steps">
+      <li>Click <strong>+ New</strong>.</li>
+      <li>Under "Vendors," click <strong>Pay bills</strong>.</li>
+      <li>Pick the <strong>Payment account</strong> (which bank account the money is coming from).</li>
+      <li>Set the <strong>Payment date</strong>.</li>
+      <li>Check the box next to the bill(s) you're paying.</li>
+      <li>Confirm the amount in the <strong>Payment</strong> column.</li>
+      <li>Click <strong>Save and close</strong> (or Save and print if mailing a paper check).</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">Pay Bills</div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Payment account:</strong> Checking &nbsp; <strong>Date:</strong> 05/30/2026</div>
+        <div style="margin-top:8px;font-size:11px;color:#6b7c93;">OPEN BILLS</div>
+        <div class="qb-field">☑ Acme Printers · Bill #4421 · Due 06/01 · $500.00</div>
+        <div class="qb-field">☐ Web Dev LLC · Bill #2025-08 · Due 06/15 · $2,000.00</div>
+        <div style="margin-top:10px;"><span class="qb-btn">Save and close</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight"><strong>Pro tip:</strong> Check the bills list every Monday. Pay anything due that week (with your client's approval). Don't let bills go past due — late fees are 100% avoidable.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop4')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop5')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 6 -->
+<section class="lesson" id="sop6">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 11</div>
+  <h2>SOP 6 · Add a New Customer or Vendor</h2>
+  <p class="subtitle">Two lookalike processes, one quick lesson.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Build clean customer and vendor records.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Add either one in under a minute.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Capture name, contact info, and key details.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>Adding a new customer</h3>
+    <ol class="steps">
+      <li>From the left sidebar, click <strong>Sales → Customers</strong> (or just Customers).</li>
+      <li>Click the green <strong>New customer</strong> button (top right).</li>
+      <li>Fill in <strong>Customer display name</strong> — this is how they appear in lists. Use a clear name like "Beta Co." not "Mark from Beta."</li>
+      <li>Add their <strong>Company name</strong>, <strong>Email</strong>, and <strong>Phone</strong>.</li>
+      <li>Add the <strong>Billing address</strong> — this prints on invoices.</li>
+      <li>Under <strong>Payments</strong>, set default terms (Net 30 is standard).</li>
+      <li>Click <strong>Save</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>Adding a new vendor</h3>
+    <ol class="steps">
+      <li>From the left sidebar, click <strong>Expenses → Vendors</strong>.</li>
+      <li>Click the green <strong>New vendor</strong> button.</li>
+      <li>Fill in <strong>Vendor display name</strong>, <strong>Company name</strong>, <strong>Email</strong>, <strong>Phone</strong>.</li>
+      <li>If this vendor is an independent contractor (not a corporation), check <strong>Track payments for 1099</strong> — this matters at tax time.</li>
+      <li>Add their <strong>Address</strong> if mailing checks.</li>
+      <li>Click <strong>Save</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">New Customer</div>
+      <div class="qb-mock-body">
+        <div class="qb-field"><strong>Display name:</strong> Beta Co.</div>
+        <div class="qb-field"><strong>Email:</strong> billing@betaco.com</div>
+        <div class="qb-field"><strong>Phone:</strong> (555) 410-2233</div>
+        <div class="qb-field"><strong>Billing address:</strong> 410 Market St., Cleveland, OH 44113</div>
+        <div class="qb-field"><strong>Payment terms:</strong> Net 30</div>
+        <div style="margin-top:10px;"><span class="qb-btn">Save</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight"><strong>Search before you add:</strong> Always search for the name first. Adding duplicates ("Beta Co." and "Beta Company") is a headache to clean up later.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop5')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop6')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 7 -->
+<section class="lesson" id="sop7">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 12</div>
+  <h2>SOP 7 · Categorize the Bank Feed</h2>
+  <p class="subtitle">QuickBooks pulls bank transactions in automatically. Your job is to sort them into the right category.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Sort each bank transaction into the right account.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Clear the "For Review" list every week.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>Decide what each transaction is, then accept or match it.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>What is the bank feed?</h3>
+    <p>When your client links their bank account to QuickBooks, every transaction from that bank shows up in a list called the <strong>Banking feed</strong>. They appear "For Review" — meaning QuickBooks doesn't know what they are yet. Your job is to tell it.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>The three actions for each transaction</h3>
+    <table class="compare">
+      <tr><th>Action</th><th>When to use it</th></tr>
+      <tr><td><strong>Match</strong></td><td>QuickBooks already has this transaction (you entered an expense or received a payment). Just click Match to link them.</td></tr>
+      <tr><td><strong>Add</strong></td><td>This is new — pick a category and click Add to record it as a fresh expense or income.</td></tr>
+      <tr><td><strong>View</strong> / Find Match</td><td>QuickBooks isn't sure. You manually pick the matching transaction (or transactions).</td></tr>
+    </table>
+  </div>
+
+  <div class="content-block">
+    <h3>Step-by-step</h3>
+    <ol class="steps">
+      <li>From the left sidebar, click <strong>Banking</strong> (or <strong>Transactions → Banking</strong>).</li>
+      <li>Pick the bank account at the top.</li>
+      <li>You'll see a list of transactions under the "For Review" tab.</li>
+      <li>For each row, look at the description and amount. Ask yourself: "Is this already in QuickBooks?"</li>
+      <li>If YES (e.g., you already entered the Staples expense) → click <strong>Match</strong>.</li>
+      <li>If NO → pick a <strong>Vendor</strong>, pick a <strong>Category</strong>, then click <strong>Add</strong>.</li>
+      <li>Move to the next row. Repeat until the list is empty.</li>
+      <li>If you're stuck on one, leave it. Don't guess. Ask your client.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <div class="qb-mock">
+      <div class="qb-mock-header">Banking · For Review (12)</div>
+      <div class="qb-mock-body">
+        <div class="qb-field">05/15 · STARBUCKS #4421 · -$8.75 · <em>guess: Meals?</em> &nbsp;&nbsp;<span class="qb-btn">Add</span> <span class="qb-btn ghost">Match</span></div>
+        <div class="qb-field">05/14 · STAPLES.COM · -$87.42 · ✅ matches existing expense &nbsp;&nbsp;<span class="qb-btn">Match</span></div>
+        <div class="qb-field">05/13 · Deposit BETA CO · +$750.00 · ✅ matches Invoice 1042 &nbsp;&nbsp;<span class="qb-btn">Match</span></div>
+        <div class="qb-field">05/12 · ADOBE INC · -$54.99 · <em>guess: Software?</em> &nbsp;&nbsp;<span class="qb-btn">Add</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success"><strong>The 80/20 rule:</strong> After a few weeks, QuickBooks learns your patterns and starts guessing the category for you. You just confirm. The bank feed gets faster every week.</div>
+
+  <div class="danger"><strong>Never click "Add" without choosing a category.</strong> If you do, QuickBooks dumps it into "Uncategorized Expense" — which is messy and confuses the accountant.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop6')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop7')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- SOP 8 -->
+<section class="lesson" id="sop8">
+  <div class="breadcrumb">Week 2 · Daily SOPs · Day 13</div>
+  <h2>SOP 8 · Run Basic Reports</h2>
+  <p class="subtitle">The "pretty summaries" your client wants to see every week or month.</p>
+
+  <div class="obj-card">
+    <div class="obj-block"><h4>Objective</h4><p>Generate and share the three reports clients ask for most.</p></div>
+    <div class="obj-block"><h4>Goal</h4><p>Pull and email any of them in under 5 minutes.</p></div>
+    <div class="obj-block"><h4>Description</h4><p>P&L, Balance Sheet, and A/R Aging — what they mean and how to make them.</p></div>
+  </div>
+
+  <div class="content-block">
+    <h3>The three reports you'll be asked for</h3>
+    <table class="compare">
+      <tr><th>Report</th><th>What it shows</th><th>When asked for</th></tr>
+      <tr><td><strong>Profit & Loss</strong> (P&L)</td><td>Money in minus money out = profit for a time period.</td><td>Every month/quarter</td></tr>
+      <tr><td><strong>Balance Sheet</strong></td><td>What the business owns, what it owes, what's left.</td><td>Monthly / year-end</td></tr>
+      <tr><td><strong>A/R Aging Summary</strong></td><td>Who owes the business money and how late they are.</td><td>Weekly</td></tr>
+    </table>
+  </div>
+
+  <div class="content-block">
+    <h3>How to run any report</h3>
+    <ol class="steps">
+      <li>From the left sidebar, click <strong>Reports</strong>.</li>
+      <li>At the top, you'll see "Favorites." Common reports live there.</li>
+      <li>Click the report name (e.g., "Profit and Loss").</li>
+      <li>At the top of the report, set the <strong>Report period</strong> — "This Month," "Last Quarter," "This Year," or custom dates.</li>
+      <li>Click <strong>Run report</strong>.</li>
+      <li>Use the buttons at the top right to <strong>Email</strong>, <strong>Print</strong>, or <strong>Export to Excel/PDF</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>What each report tells you</h3>
+    <p><strong>Profit & Loss:</strong> The top section is income. The middle is expenses. The bottom shows the difference — that's your client's profit (or loss) for the period.</p>
+    <div class="qb-mock">
+      <div class="qb-mock-header">Profit & Loss · May 1–31, 2026</div>
+      <div class="qb-mock-body">
+        <div class="qb-field">Consulting Income &nbsp;&nbsp;&nbsp; <strong>$8,200</strong></div>
+        <div class="qb-field">Product Sales &nbsp;&nbsp;&nbsp; <strong>$1,400</strong></div>
+        <div class="qb-field"><strong>Total Income</strong> &nbsp;&nbsp;&nbsp; <strong>$9,600</strong></div>
+        <br>
+        <div class="qb-field">Rent &nbsp;&nbsp;&nbsp; -$1,200</div>
+        <div class="qb-field">Software &nbsp;&nbsp;&nbsp; -$320</div>
+        <div class="qb-field">Office Supplies &nbsp;&nbsp;&nbsp; -$180</div>
+        <div class="qb-field">Meals &nbsp;&nbsp;&nbsp; -$95</div>
+        <div class="qb-field"><strong>Total Expenses</strong> &nbsp;&nbsp;&nbsp; <strong>-$1,795</strong></div>
+        <br>
+        <div class="qb-field" style="background:#e8f6e6;"><strong>NET PROFIT &nbsp;&nbsp;&nbsp; $7,805</strong></div>
+      </div>
+    </div>
+
+    <p><strong>Balance Sheet:</strong> A snapshot of the business as of one specific date. Three sections:</p>
+    <ul>
+      <li>Assets (what they own)</li>
+      <li>Liabilities (what they owe)</li>
+      <li>Equity (what's left for the owner)</li>
+    </ul>
+    <p>The magic rule: <em>Assets = Liabilities + Equity</em>. Always. If it's off, something is wrong.</p>
+
+    <p><strong>A/R Aging Summary:</strong> A list of overdue customers grouped by how late they are: current, 1–30 days, 31–60 days, 61–90 days, and 90+ days.</p>
+    <div class="qb-mock">
+      <div class="qb-mock-header">A/R Aging Summary · as of 05/16/2026</div>
+      <div class="qb-mock-body">
+        <div class="qb-field">Customer &nbsp;&nbsp;&nbsp; Current &nbsp;&nbsp;&nbsp; 1-30 &nbsp;&nbsp;&nbsp; 31-60 &nbsp;&nbsp;&nbsp; 61-90 &nbsp;&nbsp;&nbsp; 90+</div>
+        <div class="qb-field">Beta Co. &nbsp;&nbsp;&nbsp; $750 &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; —</div>
+        <div class="qb-field">Acme Inc. &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; $400 &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; —</div>
+        <div class="qb-field">Delta LLC &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; — &nbsp;&nbsp;&nbsp; $1,200 &nbsp;&nbsp;&nbsp; —</div>
+      </div>
+    </div>
+    <p>Use this report every Monday to know who needs a friendly payment reminder email.</p>
+  </div>
+
+  <div class="success"><strong>Bonus skill:</strong> Click any number in any report to drill down into the underlying transactions. This is how you investigate when a number looks weird.</div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop7')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('sop8')">Mark Complete →</button>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="lesson" id="final">
+  <div class="breadcrumb">Day 14 · The Finish Line</div>
+  <h2>Final Checklist & Cheat Sheet</h2>
+  <p class="subtitle">Print this. Pin it next to your monitor. You are officially QuickBooks-capable.</p>
+
+  <div class="content-block">
+    <h3>Your daily workflow (memorize this)</h3>
+    <ol>
+      <li>Open QuickBooks. Glance at the Dashboard.</li>
+      <li>Click Banking. Categorize new bank feed items.</li>
+      <li>Check the Sales tab. Send any invoices your client asked for.</li>
+      <li>Record any payments received.</li>
+      <li>Enter any new expenses or bills.</li>
+      <li>On Fridays: Run the P&L and A/R Aging. Email them to your client.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>The decision flowchart (when in doubt)</h3>
+    <ul>
+      <li>Customer paying NOW? → <strong>Sales Receipt</strong></li>
+      <li>Customer paying LATER? → <strong>Invoice</strong></li>
+      <li>Customer paid an old invoice? → <strong>Receive Payment</strong></li>
+      <li>Client paid for something already? → <strong>Expense</strong></li>
+      <li>Vendor sent a bill due later? → <strong>Bill</strong> → later → <strong>Pay Bills</strong></li>
+      <li>New transaction in the bank feed? → <strong>Match</strong> if it already exists in QB, or <strong>Add</strong> with a category.</li>
+    </ul>
+  </div>
+
+  <div class="content-block">
+    <h3>The 7 commandments of being a great QuickBooks VA</h3>
+    <ol>
+      <li><strong>Never guess at a category.</strong> Ask the client or accountant.</li>
+      <li><strong>Always attach receipts.</strong> Use the paperclip icon.</li>
+      <li><strong>Search before adding a new customer or vendor.</strong> Avoid duplicates.</li>
+      <li><strong>Type meaningful descriptions.</strong> Future-you will be grateful.</li>
+      <li><strong>Don't touch the Chart of Accounts</strong> without permission.</li>
+      <li><strong>Run a P&L weekly</strong> to spot weird numbers early.</li>
+      <li><strong>Communicate over-communicate.</strong> "Hey, I wasn't sure about this $200 from Best Buy — what category?" is golden.</li>
+    </ol>
+  </div>
+
+  <div class="content-block">
+    <h3>What to say when a client asks "Do you know QuickBooks?"</h3>
+    <div class="success">"Yes — I'm comfortable with the daily operations: creating and sending invoices, recording customer payments, entering expenses and bills, categorizing transactions in the bank feed, and pulling reports like the Profit & Loss, Balance Sheet, and A/R Aging. I always check with the accountant before doing anything with the Chart of Accounts or journal entries."</div>
+    <p>That's a real, professional answer. It tells the truth, sets expectations, and signals that you know your limits — which clients love.</p>
+  </div>
+
+  <div class="content-block">
+    <h3>Where to go next (when you're ready)</h3>
+    <ul>
+      <li>Intuit's free <strong>QuickBooks ProAdvisor</strong> training (sign up at proadvisor.intuit.com — it's free)</li>
+      <li>The official <strong>QuickBooks YouTube channel</strong> for short how-tos</li>
+      <li>Practice in the test drive sandbox once a week to stay sharp</li>
+      <li>Eventually: learn bank reconciliation (the formal monthly close)</li>
+    </ul>
+  </div>
+
+  <div class="complete-bar">
+    <button class="nav-arrow-btn" onclick="goTo('sop8')">← Back</button>
+    <button class="complete-btn" onclick="markComplete('final')">🎉 Finish Course</button>
+  </div>
+</section>
+
+</main>
+
+<script>
+  const lessons = ['intro','d1','d2','d3','d4','d5','sop1','sop2','sop3','sop4','sop5','sop6','sop7','sop8','final'];
+  const TOTAL = 13; // intro + d1-d5 + sop1-sop8 + final = 15, but display says "of 13" for completable lessons. Let's recount: intro,d1,d2,d3,d4,d5,sop1-8,final = 15. Update.
+
+  function loadProgress() {
+    try {
+      const saved = localStorage.getItem('qbProgress');
+      return saved ? JSON.parse(saved) : {};
+    } catch(e) { return {}; }
+  }
+  function saveProgress(p) {
+    try { localStorage.setItem('qbProgress', JSON.stringify(p)); } catch(e){}
+  }
+  let progress = loadProgress();
+
+  function updateUI() {
+    const completed = Object.keys(progress).filter(k => progress[k]).length;
+    const total = lessons.length;
+    document.getElementById('progressText').textContent = completed + ' of ' + total + ' complete';
+    document.getElementById('progressFill').style.width = (completed / total * 100) + '%';
+    document.querySelectorAll('.nav-item').forEach(n => {
+      const id = n.dataset.lesson;
+      if (progress[id]) n.classList.add('completed');
+      else n.classList.remove('completed');
+    });
+    document.querySelectorAll('.complete-btn').forEach(btn => {
+      const onclick = btn.getAttribute('onclick') || '';
+      const match = onclick.match(/markComplete\('([^']+)'\)/);
+      if (match && progress[match[1]]) {
+        btn.classList.add('done');
+        btn.textContent = '✓ Completed — re-mark?';
+      }
+    });
+  }
+
+  function markComplete(id) {
+    progress[id] = !progress[id];
+    saveProgress(progress);
+    updateUI();
+    // auto-advance to next lesson
+    if (progress[id]) {
+      const idx = lessons.indexOf(id);
+      if (idx >= 0 && idx < lessons.length - 1) {
+        setTimeout(() => goTo(lessons[idx + 1]), 350);
+      }
+    }
+  }
+
+  function goTo(id) {
+    document.querySelectorAll('.lesson').forEach(l => l.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const nav = document.querySelector('.nav-item[data-lesson="'+id+'"]');
+    if (nav) nav.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function answer(el, correct) {
+    el.parentElement.querySelectorAll('.quiz-option').forEach(o => {
+      o.classList.remove('correct','wrong');
+      o.style.pointerEvents = 'auto';
+    });
+    el.classList.add(correct ? 'correct' : 'wrong');
+    if (correct) {
+      el.textContent += '  ✓ Yes!';
+    } else {
+      el.textContent += '  ✗ Try again';
+      setTimeout(() => {
+        el.classList.remove('wrong');
+        el.textContent = el.textContent.replace('  ✗ Try again','');
+      }, 1500);
+    }
+  }
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', (e) => {
+      if (e.target.classList.contains('nav-check')) return;
+      goTo(n.dataset.lesson);
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm('Reset all progress?')) {
+      progress = {};
+      saveProgress(progress);
+      updateUI();
+      goTo('intro');
+    }
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>
